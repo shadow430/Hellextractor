@@ -22,6 +22,39 @@ stingray::unit::mesh::mesh(uint8_t const* ptr)
 	_group_ptr    = reinterpret_cast<decltype(_group_ptr)>(ptr + _ptr->group_offset);
 }
 
+size_t stingray::unit::mesh::datatype()
+{
+	return _ptr->datatype_index;
+}
+
+size_t stingray::unit::mesh::materials()
+{
+	return _ptr->materials;
+}
+
+stingray::thin_hash_t stingray::unit::mesh::material(size_t idx)
+{
+	if (idx > _ptr->materials) {
+		throw std::out_of_range("Index out of range");
+	}
+
+	return _material_ptr[idx];
+}
+
+size_t stingray::unit::mesh::groups()
+{
+	return _ptr->groups;
+}
+
+stingray::unit::mesh::group_t const* stingray::unit::mesh::group(size_t idx)
+{
+	if (idx > _ptr->groups) {
+		throw std::out_of_range("Index out of range");
+	}
+
+	return &_group_ptr[idx];
+}
+
 stingray::unit::mesh_list::~mesh_list() {}
 
 stingray::unit::mesh_list::mesh_list() : _ptr(), _offset_ptr(), _name_ptr(), _mesh_ptr(), _meshes(), _map() {}

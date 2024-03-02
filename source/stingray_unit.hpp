@@ -155,6 +155,16 @@ namespace stingray {
 			~mesh();
 			mesh();
 			mesh(uint8_t const* ptr);
+
+			size_t datatype();
+
+			size_t materials();
+
+			stingray::thin_hash_t material(size_t idx);
+
+			size_t groups();
+
+			group_t const* group(size_t idx);
 		};
 
 		class mesh_list {
