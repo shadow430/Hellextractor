@@ -60,7 +60,7 @@ stingray::hash_t::operator uint64_t() const noexcept
 
 stingray::hash_t::operator stingray::thin_hash_t() const noexcept
 {
-	return {(_value) >> 32};
+	return static_cast<uint32_t>((_value) >> 32);
 }
 
 stingray::hash_t::operator uint32_t() const noexcept
