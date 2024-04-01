@@ -22,7 +22,7 @@
 
 mapped_file::mapped_file() : _path(), _file(), _map(), _ptr() {}
 
-mapped_file::mapped_file(std::filesystem::path path) : _path(path)
+mapped_file::mapped_file(const std::filesystem::path& path) : _path(path)
 {
 #ifdef WIN32
 	_file.reset(CreateFileA(reinterpret_cast<LPCSTR>(path.generic_string().c_str()), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL), [](void* p) { CloseHandle(p); });

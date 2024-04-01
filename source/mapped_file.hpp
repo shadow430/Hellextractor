@@ -20,7 +20,7 @@ class mapped_file {
 
 	public:
 	mapped_file();
-	mapped_file(std::filesystem::path path);
+	mapped_file(const std::filesystem::path& path);
 
 	~mapped_file();
 
