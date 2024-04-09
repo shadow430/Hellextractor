@@ -235,9 +235,9 @@ class hash_murmur_64a : public hellextractor::hash::instance {
 			hash ^= (static_cast<uint64_t>(data2[1]) << 8);
 		case 1:
 			hash ^= (static_cast<uint64_t>(data2[0]));
+			hash *= mix;
 		};
 
-		hash *= mix;
 		hash ^= hash >> shifts;
 
 		hash *= mix;
