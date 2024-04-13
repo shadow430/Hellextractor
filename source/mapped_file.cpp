@@ -15,6 +15,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #else
+#include <cerrno>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -22,7 +23,7 @@
 
 mapped_file::mapped_file() : _path(), _file(), _map(), _ptr() {}
 
-mapped_file::mapped_file(std::filesystem::path path) : _path(path)
+mapped_file::mapped_file(const std::filesystem::path& path) : _path(path)
 {
 #ifdef WIN32
 	_file.reset(CreateFileA(reinterpret_cast<LPCSTR>(path.generic_string().c_str()), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL), [](void* p) { CloseHandle(p); });
@@ -40,14 +41,16 @@ mapped_file::mapped_file(std::filesystem::path path) : _path(path)
 		throw std::runtime_error("MapViewOfFile failed.");
 	}
 #else
-	_file.reset(reinterpret_cast<void*>(open(path.generic_string().c_str(), O_NOATIME | O_RDONLY)), [](void* p) { close(reinterpret_cast<size_t>(p)); });
+	int fd  = open(path.generic_string().c_str(), O_NOATIME | O_RDONLY);
+	int err = errno;
+	_file.reset(reinterpret_cast<void*>(fd), [](void* p) { close(reinterpret_cast<size_t>(p)); });
 	if (reinterpret_cast<size_t>(_file.get()) == -1) {
-		throw std::runtime_error("open failed.");
+		throw std::runtime_error(std::string{"open failed: "} + std::to_string(err));
 	}
 
 	size_t size = std::filesystem::file_size(path);
-	_map.reset(reinterpret_cast<void*>(mmap(nullptr, size, PROT_READ, MAP_NORESERVE, reinterpret_cast<size_t>(_file.get()), 0)), [&size](void* p) { munmap(p, size); });
-	if (!_map) {
+	_map.reset(reinterpret_cast<void*>(mmap(nullptr, size, PROT_READ, MAP_NORESERVE | MAP_PRIVATE, reinterpret_cast<size_t>(_file.get()), 0)), [&size](void* p) { munmap(p, size); });
+	if (_map.get() == reinterpret_cast<void*>(-1)) {
 		throw std::runtime_error("mmap failed.");
 	}
 
